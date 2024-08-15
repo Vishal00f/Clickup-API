@@ -1,32 +1,12 @@
-import { asyncHandler } from "../utils/asyncHandler";
+import { Request, Response } from "express";
+import { Task } from "../models/task.model";
 import ApiError from "../utils/ApiError";
 import ApiResponse from "../utils/ApiResponse";
-import { Request,Response } from "express";
-import { Task } from "../models/task.model";
-import { User } from "../models/user.model";
+import { asyncHandler } from "../utils/asyncHandler";
 import { Types } from "mongoose";
+import { Subtask } from "../models/subtask.model";
+import { User } from "../models/user.model";
 
-const createTask = asyncHandler(async (req:Request,res:Response)=>{
-        const {title,description,priority,status,assignedTo,subTasks}=req.body
-        if(!title ){
-            throw new ApiError(400,"cannot fetch title for task");
-        }
-        const newTask =await Task.create({
-            title:title,
-            description:description,
-            priority:priority,
-            status:status,
-            assignedTo:assignedTo,
-            subTasks:subTasks
-        })
-        if(!newTask){
-            throw new ApiError(400,"Error creating task");
-        }
-        console.log(newTask)
-        return res.status(200).json(
-            new ApiResponse(200,"Task created successfully",newTask)
-        )
-})
 const updateTaskTitleById = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params; // Get the task ID from the URL parameters
     const { title } = req.body;
@@ -37,7 +17,7 @@ const updateTaskTitleById = asyncHandler(async (req: Request, res: Response) => 
         throw new ApiError(400, "Title is required");
     }
 
-    const updatedTask = await Task.findByIdAndUpdate(
+    const updatedTask = await Subtask.findByIdAndUpdate(
         id,
         { title: title },
         { new: true }
@@ -48,7 +28,7 @@ const updateTaskTitleById = asyncHandler(async (req: Request, res: Response) => 
     }
 
     return res.status(200).json(
-        new ApiResponse(200, "Task title updated successfully", updatedTask)
+        new ApiResponse(200, "subtask title updated successfully", updatedTask)
     );
 });
 const updateTaskDescriptionById = asyncHandler(async (req: Request, res: Response) => {
@@ -62,7 +42,7 @@ const updateTaskDescriptionById = asyncHandler(async (req: Request, res: Respons
         throw new ApiError(400, "Title is required");
     }
 
-    const updatedTask = await Task.findByIdAndUpdate(
+    const updatedTask = await Subtask.findByIdAndUpdate(
         id,
         { description:description },
         { new: true }
@@ -73,7 +53,7 @@ const updateTaskDescriptionById = asyncHandler(async (req: Request, res: Respons
     }
 
     return res.status(200).json(
-        new ApiResponse(200, "Task description updated successfully", updatedTask)
+        new ApiResponse(200, "subTask description updated successfully", updatedTask)
     );
 });
 const updateTaskPriorityById = asyncHandler(async (req:Request,res:Response)=>{
@@ -87,7 +67,7 @@ const updateTaskPriorityById = asyncHandler(async (req:Request,res:Response)=>{
         throw new ApiError(400, "Title is required");
     }
 
-    const updatedTask = await Task.findByIdAndUpdate(
+    const updatedTask = await Subtask.findByIdAndUpdate(
         id,
         { priority:priority },
         { new: true }
@@ -98,7 +78,7 @@ const updateTaskPriorityById = asyncHandler(async (req:Request,res:Response)=>{
     }
 
     return res.status(200).json(
-        new ApiResponse(200, "Task priority updated successfully", updatedTask)
+        new ApiResponse(200, "subtask priority updated successfully", updatedTask)
     );
 })
 const updateTaskStatusById = asyncHandler(async (req:Request,res:Response)=>{
@@ -112,7 +92,7 @@ const updateTaskStatusById = asyncHandler(async (req:Request,res:Response)=>{
         throw new ApiError(400, "Title is required");
     }
 
-    const updatedTask = await Task.findByIdAndUpdate(
+    const updatedTask = await Subtask.findByIdAndUpdate(
         id,
         { status:status },
         { new: true }
@@ -203,5 +183,3 @@ const deleteTaskById = asyncHandler(async (req:Request,res:Response)=>{
     await Task.findByIdAndDelete(id)
     return res.status(200).json(new ApiResponse(200,"task deleted successfully"))
 })
-
-export {createTask,deleteTaskById,updateTaskTitleById,updateTaskDescriptionById,updateTaskPriorityById,updateTaskStatusById,assignTaskTo,createSubTask};

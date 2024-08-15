@@ -1,5 +1,5 @@
 import mongoose,{Schema,Document} from "mongoose";
-interface IWorkspace{
+interface IWorkspace extends Document{
     workspaceProfile?:string,
     name:string,
     description?:string,
