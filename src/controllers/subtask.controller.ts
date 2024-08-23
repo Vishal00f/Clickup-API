@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { Task } from "../models/task.model";
 import ApiError from "../utils/ApiError";
 import ApiResponse from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -74,7 +73,7 @@ const updateTaskPriorityById = asyncHandler(async (req:Request,res:Response)=>{
     )
 
     if (!updatedTask) {
-        throw new ApiError(404, "Task not found");
+        throw new ApiError(404, "subtask not found");
     }
 
     return res.status(200).json(
@@ -114,12 +113,12 @@ const assignTaskTo = asyncHandler(async (req: Request, res: Response) => {
         throw new ApiError(400, 'Username is required');
     }
     if (!id) {
-        throw new ApiError(400, 'Task ID is required');
+        throw new ApiError(400, 'subTask ID is required');
     }
 
-    const task = await Task.findById(id);
-    if (!task) {
-        throw new ApiError(404, 'Task not found');
+    const subtask = await Subtask.findById(id);
+    if (!subtask) {
+        throw new ApiError(404, 'subTask not found');
     }
 
     const user = await User.findOne({ username }).select('-password -refreshToken -id');
@@ -128,47 +127,20 @@ const assignTaskTo = asyncHandler(async (req: Request, res: Response) => {
     }
 
     // Check if the task is already assigned to the user
-    if (task.assignedTo?.includes(user._id as Types.ObjectId) || user.tasks.includes(task._id as Types.ObjectId)) {
+    if (subtask.assignedTo?.includes(user._id as Types.ObjectId) ) {
         throw new ApiError(400, 'User is already assigned to this task');
     }
 
     // Assign the task to the user
-    task.assignedTo?.push(user._id as Types.ObjectId);
-    user.tasks.push(task._id as Types.ObjectId);
-
+    subtask.assignedTo?.push(user._id as Types.ObjectId);
+    user.tasks.push(subtask._id as Types.ObjectId);
 
     await user.save({ validateBeforeSave: false });
-    await task.save();
+    await subtask.save();
 
-    return res.status(200).json(new ApiResponse(200, 'Task successfully assigned to user', user));
+    return res.status(200).json(new ApiResponse(200, 'Task successfully assigned to user', subtask));
 });
 
-const createSubTask = asyncHandler(async (req:Request,res:Response)=>{
-    const {id} = req.params;
-    const {title,description,priority,status}=req.body
-    
-    const task= await Task.findById(id)
-    if(!task){
-        throw new ApiError(404,"task not found");
-    }
-    const newSubTask = await Task.create(
-        {
-            title:title,
-            description:description,
-            priority:priority,
-            status:status
-        }
-    )
-    if(!newSubTask){
-        throw new ApiError(404,"Unable to create subtask");
-    }
-    if(task.subTasks?.includes(newSubTask._id as Types.ObjectId)){
-        throw new ApiError(400,"subtask already exists in this task");
-    }
-    task.subTasks?.push(newSubTask._id as Types.ObjectId)
-    await task.save();
-    return res.status(200).json(new ApiResponse(200,"Subtask created successfully",task));
-})
 
 
 const deleteTaskById = asyncHandler(async (req:Request,res:Response)=>{
@@ -176,10 +148,11 @@ const deleteTaskById = asyncHandler(async (req:Request,res:Response)=>{
     if(!id){
         throw new ApiError(404,"invalid request")
     }
-    const task=await Task.findById(id);
+    const task=await Subtask.findById(id);
     if(!task){
         throw new ApiError(404,"the task u want to delete is unable to delete")
     }
-    await Task.findByIdAndDelete(id)
+    await Subtask.findByIdAndDelete(id)
     return res.status(200).json(new ApiResponse(200,"task deleted successfully"))
 })
+export {updateTaskTitleById,updateTaskDescriptionById,updateTaskPriorityById,updateTaskStatusById,deleteTaskById,assignTaskTo};

@@ -23,7 +23,7 @@ interface IUser extends Document{
   fullName: string;
 }
 
-interface IUserModel extends Model<IUser, IUserMethods> {
+interface IUserModel extends Model<IUser,{}, IUserMethods> {
   // Add any static methods here if needed
 }
 

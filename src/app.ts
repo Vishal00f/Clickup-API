@@ -14,4 +14,6 @@ app.use(cookieParser())
 
 import taskRouter from './routes/task.route'
 app.use("/api/v1/tasks/",taskRouter)
+import userRouter from './routes/user.route'
+app.use('/user/',userRouter)
 export {app}

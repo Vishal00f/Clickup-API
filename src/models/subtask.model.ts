@@ -2,11 +2,11 @@ import mongoose,{Schema,Document} from "mongoose";
 
 interface ISubtask extends Document{
     title:string,
-    description:string,
-    priority:'low' | 'normal' | 'high' | 'urgent',
-    status:"to-do"|"in-progress"|"done"|"in-review"|"develop"|"pre-production"|"in-testing",
-    assignedTo:mongoose.Types.ObjectId[],
-    subTasks:mongoose.Types.ObjectId[]
+    description?:string,
+    priority?:'low' | 'normal' | 'high' | 'urgent',
+    status?:"to-do"|"in-progress"|"done"|"in-review"|"develop"|"pre-production"|"in-testing",
+    assignedTo?:mongoose.Types.ObjectId[],
+    category:"subtask"
 }
 const subtaskSchema = new Schema<ISubtask>({
     title:{
@@ -30,6 +30,10 @@ const subtaskSchema = new Schema<ISubtask>({
         type:[mongoose.Types.ObjectId],
         ref:"User",
         default:[]
+    },
+    category:{
+        type:String,
+        default:'subtask'
     }
 })
 

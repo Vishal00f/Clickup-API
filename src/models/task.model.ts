@@ -7,7 +7,8 @@ interface ITask extends Document{
     priority?:'low' | 'normal' | 'high' | 'urgent',
     status?:"to-do"|"in-progress"|"done"|"in-review"|"develop"|"pre-production"|"in-testing",
     assignedTo?:mongoose.Types.ObjectId[],
-    subTasks?:mongoose.Types.ObjectId[]
+    subTasks?:mongoose.Types.ObjectId[],
+    category:"task"
 }
 const taskSchema = new Schema<ITask>({
     title:{
@@ -36,6 +37,10 @@ const taskSchema = new Schema<ITask>({
         type:[mongoose.Types.ObjectId],
         ref:"SubTask",
         default:[]
+    },
+    category:{
+        type:String,
+        default:"task"
     }
 })
 export const Task=mongoose.model<ITask>("Task",taskSchema)
