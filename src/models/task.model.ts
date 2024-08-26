@@ -35,7 +35,7 @@ const taskSchema = new Schema<ITask>({
     },
     subTasks:{
         type:[mongoose.Types.ObjectId],
-        ref:"SubTask",
+        ref:"Subtask",
         default:[]
     },
     category:{

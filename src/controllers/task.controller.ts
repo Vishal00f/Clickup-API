@@ -4,7 +4,8 @@ import ApiResponse from "../utils/ApiResponse";
 import { Request,Response } from "express";
 import { Task } from "../models/task.model";
 import { User } from "../models/user.model";
-import { Types } from "mongoose";
+import { ObjectId, Types } from "mongoose";
+import { Subtask } from "../models/subtask.model";
 
 const createTask = asyncHandler(async (req:Request,res:Response)=>{
         const {title,description,priority,status,assignedTo,subTasks}=req.body
@@ -163,32 +164,34 @@ const assignTaskTo = asyncHandler(async (req: Request, res: Response) => {
     return res.status(200).json(new ApiResponse(200, 'Task successfully assigned to user', user));
 });
 
-const createSubTask = asyncHandler(async (req:Request,res:Response)=>{
-    const {id} = req.params;
-    const {title,description,priority,status}=req.body
+const createSubTask = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params; // This is the parent task ID
+    const { title, description, priority, status } = req.body;
     
-    const task= await Task.findById(id)
-    if(!task){
-        throw new ApiError(404,"task not found");
+    const task = await Task.findById(id);
+    if (!task) {
+        throw new ApiError(404, "Task not found");
     }
-    const newSubTask = await Task.create(
-        {
-            title:title,
-            description:description,
-            priority:priority,
-            status:status
-        }
-    )
-    if(!newSubTask){
-        throw new ApiError(404,"Unable to create subtask");
+    
+    const newSubTask = await Subtask.create({
+        title,
+        description,
+        priority,
+        status,
+        task: task._id // Reference to the parent task
+    });
+    
+    if (!newSubTask) {
+        throw new ApiError(500, "Unable to create subtask");
     }
-    if(task.subTasks?.includes(newSubTask._id as Types.ObjectId)){
-        throw new ApiError(400,"subtask already exists in this task");
-    }
-    task.subTasks?.push(newSubTask._id as Types.ObjectId)
+    
+    // No need to check if subtask already exists, as we're creating a new one
+    task.subTasks = task.subTasks || [];
+    task.subTasks.push(newSubTask._id as Types.ObjectId);
     await task.save();
-    return res.status(200).json(new ApiResponse(200,"Subtask created successfully",task));
-})
+    
+    return res.status(201).json(new ApiResponse(201, "Subtask created successfully", newSubTask));
+});
 
 
 const deleteTaskById = asyncHandler(async (req:Request,res:Response)=>{
@@ -204,4 +207,30 @@ const deleteTaskById = asyncHandler(async (req:Request,res:Response)=>{
     return res.status(200).json(new ApiResponse(200,"task deleted successfully"))
 })
 
-export {createTask,deleteTaskById,updateTaskTitleById,updateTaskDescriptionById,updateTaskPriorityById,updateTaskStatusById,assignTaskTo,createSubTask};
+const getAllSubtasksById = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    if (!id) {
+        throw new ApiError(400, "Task ID is required");
+    }
+
+    if (!Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid task ID");
+    }
+
+    const task = await Task.findById(id);
+
+    if (!task) {
+        throw new ApiError(404, "Task not found");
+    }
+
+    const subtasks = await Subtask.find({ _id: { $in: task.subTasks } });
+
+    if (subtasks.length === 0) {
+        return res.status(200).json(new ApiResponse(200, "No subtasks found for this task", []));
+    }
+
+    return res.status(200).json(new ApiResponse(200, "Fetched all subtasks", subtasks));
+});
+
+export {createTask,deleteTaskById,updateTaskTitleById,updateTaskDescriptionById,updateTaskPriorityById,updateTaskStatusById,assignTaskTo,createSubTask,getAllSubtasksById};

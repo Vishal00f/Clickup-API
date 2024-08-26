@@ -37,7 +37,7 @@ const registerUser = asyncHandler(async (req:Request,res:Response)=>{
         throw new ApiError(400, "All fields are required");
     }
     if (!firstName || !lastName || !username || !email || !password) {
-        throw new ApiError(400, "Email is invalid")
+        throw new ApiError(400, "All fields are required")
     }
     const existedUser = await User.findOne({
         $or:[{username},{email}]
@@ -228,7 +228,5 @@ const updateUsername = asyncHandler(async (req:Request,res:Response)=>{
         throw new ApiError(404,"unable to fetch user")
     }
     return res.status(200).json(new ApiResponse(200, "Username changed successfully", userWithNewUsername));
-
-
 })
 export {registerUser,loginUser,logOutUser,changePassword,getCurrentUser,getUserTasks,updateUsername};

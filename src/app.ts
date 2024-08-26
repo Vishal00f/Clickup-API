@@ -16,4 +16,6 @@ import taskRouter from './routes/task.route'
 app.use("/api/v1/tasks/",taskRouter)
 import userRouter from './routes/user.route'
 app.use('/user/',userRouter)
+import subtaskRouter from './routes/subtask.route'
+app.use('/api/v1/subtasks/',subtaskRouter);
 export {app}

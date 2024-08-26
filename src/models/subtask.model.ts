@@ -7,6 +7,7 @@ interface ISubtask extends Document{
     status?:"to-do"|"in-progress"|"done"|"in-review"|"develop"|"pre-production"|"in-testing",
     assignedTo?:mongoose.Types.ObjectId[],
     category:"subtask"
+    task:mongoose.Types.ObjectId   
 }
 const subtaskSchema = new Schema<ISubtask>({
     title:{
@@ -34,7 +35,12 @@ const subtaskSchema = new Schema<ISubtask>({
     category:{
         type:String,
         default:'subtask'
-    }
+    },
+    task: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Task',
+         required: true
+     }
 })
 
 export const Subtask = mongoose.model<ISubtask>("Subtask",subtaskSchema);

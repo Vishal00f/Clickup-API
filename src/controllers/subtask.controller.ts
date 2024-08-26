@@ -16,18 +16,14 @@ const updateTaskTitleById = asyncHandler(async (req: Request, res: Response) => 
         throw new ApiError(400, "Title is required");
     }
 
-    const updatedTask = await Subtask.findByIdAndUpdate(
-        id,
-        { title: title },
-        { new: true }
-    )
-
-    if (!updatedTask) {
-        throw new ApiError(404, "Task not found");
-    }
-
+    
+    const updatedSubtask = await Subtask.findByIdAndUpdate(id, { title: title }, { new: true });
+   
+if(!updatedSubtask){
+   throw new ApiError(400,"unable to find subtask to update ")
+}
     return res.status(200).json(
-        new ApiResponse(200, "subtask title updated successfully", updatedTask)
+        new ApiResponse(200, "subtask title updated successfully",updatedSubtask)
     );
 });
 const updateTaskDescriptionById = asyncHandler(async (req: Request, res: Response) => {
