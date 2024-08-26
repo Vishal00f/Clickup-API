@@ -4,7 +4,7 @@ import ApiError from "../utils/ApiError";
 import { User } from "../models/user.model";
 import { Request, Response } from "express";
 import { Types } from "mongoose";
-
+import jwt, { JwtPayload, Secret } from "jsonwebtoken";
 interface AuthenticatedRequest extends Request {
     user: {
       _id: string;
@@ -229,4 +229,44 @@ const updateUsername = asyncHandler(async (req:Request,res:Response)=>{
     }
     return res.status(200).json(new ApiResponse(200, "Username changed successfully", userWithNewUsername));
 })
-export {registerUser,loginUser,logOutUser,changePassword,getCurrentUser,getUserTasks,updateUsername};
+
+
+const refreshAccessToken = asyncHandler(async (req:Request, res:Response) => {
+
+
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+    if (!incomingRefreshToken) {
+        throw new ApiError(401, "unauthorized access")
+    }
+    try {
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET as Secret) as JwtPayload
+
+        const user = await User.findById(decodedToken?._id)
+        if (!user) {
+            throw new ApiError(401, "Invalid refresh token")
+        }
+
+        if (incomingRefreshToken !== user?.refreshToken) {
+            throw new ApiError(401, "refresh token is expired or used")
+        }
+
+        const { accessToken, refreshToken:newRefreshToken } =await generateAccessAndRefreshToken(user._id)
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", newRefreshToken, options)
+            .json(
+                new ApiResponse(200, "Access Token refreshed",  { accessToken, refreshToken: newRefreshToken })
+            )
+
+    } catch (error) {
+        throw new ApiError(401, "Invalid refresh token")
+    }
+})
+
+export {registerUser,loginUser,logOutUser,changePassword,getCurrentUser,getUserTasks,updateUsername,refreshAccessToken};

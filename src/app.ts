@@ -12,10 +12,12 @@ app.use(express.urlencoded({extended:true,limit:"16kb"}))
 app.use(express.static("public"))
 app.use(cookieParser())
 
-import taskRouter from './routes/task.route'
+import taskRouter from './routes/task.routes'
 app.use("/api/v1/tasks/",taskRouter)
-import userRouter from './routes/user.route'
+import userRouter from './routes/user.routes'
 app.use('/user/',userRouter)
-import subtaskRouter from './routes/subtask.route'
+import subtaskRouter from './routes/subtask.routes'
 app.use('/api/v1/subtasks/',subtaskRouter);
+import workspaceRouter from './routes/workspace.routes'
+app.use('/workspace/',workspaceRouter)
 export {app}

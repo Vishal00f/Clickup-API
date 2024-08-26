@@ -3,7 +3,7 @@ interface IWorkspace extends Document{
     workspaceProfile?:string,
     name:string,
     description?:string,
-    users?:string
+    users?:mongoose.Types.ObjectId[]
 }
 const WorkspaceSchema = new Schema<IWorkspace>({
     workspaceProfile:{
